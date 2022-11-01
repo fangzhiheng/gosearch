@@ -12,12 +12,18 @@ const (
 	RenderSynopsis
 	RenderHomeSite
 
+	RenderImportedBy
+
+	RenderVersion
+
+	RenderPublished
+
 	notRenderTitle
 	notRenderEmpty
 )
 
 const RenderUndefined = 0
-const RenderAll = RenderName | RenderImportPath | RenderLicense | RenderSynopsis | RenderHomeSite
+const RenderAll = RenderName | RenderImportPath | RenderLicense | RenderSynopsis | RenderHomeSite | RenderImportedBy | RenderVersion | RenderPublished
 
 // Formatter print a pretty Package description
 type Formatter interface {
@@ -31,8 +37,8 @@ type ShortFormatter struct {
 }
 
 func (s *ShortFormatter) Format(p Package) string {
-	if hasBitMask(s.renderFlag, RenderName|RenderImportPath) {
-		return fmt.Sprintf("%-16s %-s", p.Name, p.ImportPath)
+	if hasBitMask(s.renderFlag, RenderName|RenderImportPath|RenderVersion) {
+		return fmt.Sprintf("%s %s@%s", p.Name, p.ImportPath, p.Version)
 	}
 	if hasBitMask(s.renderFlag, RenderImportPath) {
 		return fmt.Sprintf(p.ImportPath)
@@ -87,11 +93,20 @@ func (f *DefaultFormatter) Format(p Package) string {
 	if hasBitMask(flag, RenderImportPath) && (isNotRenderEmpty || p.ImportPath != "") {
 		b.WriteString(title("ImportPath") + p.ImportPath + "\n")
 	}
-	if hasBitMask(flag, RenderLicense) && (isNotRenderEmpty || p.License != "") {
-		b.WriteString(title("License") + p.License + "\n")
+	if hasBitMask(flag, RenderVersion) && (isNotRenderEmpty || p.Version != "") {
+		b.WriteString(title("Version") + p.Version + "\n")
 	}
 	if hasBitMask(flag, RenderSynopsis) && (isNotRenderEmpty || p.Synopsis != "") {
 		b.WriteString(title("Synopsis") + p.Synopsis + "\n")
+	}
+	if hasBitMask(flag, RenderImportedBy) && (isNotRenderEmpty || p.ImportedBy != "") {
+		b.WriteString(title("ImportedBy") + p.ImportedBy + "\n")
+	}
+	if hasBitMask(flag, RenderPublished) && (isNotRenderEmpty || p.Published != "") {
+		b.WriteString(title("Published") + p.Published + "\n")
+	}
+	if hasBitMask(flag, RenderLicense) && (isNotRenderEmpty || p.License != "") {
+		b.WriteString(title("License") + p.License + "\n")
 	}
 	if hasBitMask(flag, RenderHomeSite) && (isNotRenderEmpty || p.HomeSite != "") {
 		b.WriteString(title("HomeSite") + p.HomeSite + "\n")

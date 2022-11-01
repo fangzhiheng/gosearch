@@ -71,9 +71,26 @@ func (conv *converter) Convert(snap *goquery.Selection) Package {
 	synopsis := snap.Find(".SearchSnippet-synopsis").Text()
 	pkg.Synopsis = strings.TrimSpace(synopsis)
 
-	info := snap.Find(".SearchSnippet-infoLabel").Text()
-	info = conv.spaceRegexp.ReplaceAllString(info, " ")
-	pkg.License = strings.TrimSpace(info[strings.LastIndexByte(info, '|')+1:])
+	infoDom := snap.Find(".SearchSnippet-infoLabel")
+	pkg.License = strings.TrimSpace(infoDom.Find(".snippet-license").Text())
+
+	type applier func(v string)
+
+	appliers := []applier{
+		func(v string) {
+			pkg.ImportedBy = strings.TrimSpace(v)
+		},
+		func(v string) {
+			pkg.Version = strings.TrimSpace(v)
+		},
+		func(v string) {
+			pkg.Published = strings.TrimSpace(v)
+		},
+	}
+	applyNodes := infoDom.Find("strong").Nodes
+	for i := 0; i < len(applyNodes) && i < len(appliers); i++  {
+		appliers[i](applyNodes[i].FirstChild.Data)
+	}
 	return pkg
 }
 

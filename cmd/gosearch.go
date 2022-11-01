@@ -31,7 +31,6 @@ func main() {
 	}
 
 	flags := root.Flags()
-	flags.BoolVar(&option.Insecure, "insecure", false, "Skip https cert verify")
 	flags.BoolVarP(&option.RenderShortly, "short", "s", false, "Render results shortly")
 	flags.BoolVarP(&option.NotRenderTitle, "omittitle", "r", false, "Render raw results")
 
@@ -45,7 +44,6 @@ func main() {
 type SearchOption struct {
 	Keywords       []string
 	NotRenderTitle bool
-	Insecure       bool
 	RenderShortly  bool
 }
 
@@ -54,7 +52,7 @@ func Search(ctx context.Context, option SearchOption) error {
 	if len(keywords) == 0 {
 		return nil
 	}
-	client := createHttpClient(option)
+	client := createHttpClient()
 	searcher := gosearch.NewOfficialSearcher(client)
 	parallelism := int(math.Min(float64(runtime.NumCPU()), float64(len(keywords))))
 	keywordsCh := make(chan string, parallelism)
@@ -133,12 +131,12 @@ func createFormatter(option SearchOption) gosearch.Formatter {
 	return formatter
 }
 
-func createHttpClient(option SearchOption) *http.Client {
+func createHttpClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: option.Insecure,
+				InsecureSkipVerify: true,
 			},
 		},
 	}

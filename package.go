@@ -8,6 +8,15 @@ type Package struct {
 	// 导入路径
 	ImportPath string
 
+	// 被引用次数
+	ImportedBy string
+
+	// 版本
+	Version string
+
+	// 上次发布日期
+	Published string
+
 	// 主页
 	HomeSite string
 
